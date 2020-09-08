@@ -22,13 +22,16 @@ test_images = test_images / 255.0
 train_images = train_images.reshape(-1,28,28,1)
 test_images = test_images.reshape(-1,28,28,1)
 
+train_labels = tf.keras.utils.to_categorical(train_labels, num_classes=10)
+test_labels = tf.keras.utils.to_categorical(test_labels, num_classes=10)
+
 # Create Model
 model = tf.keras.models.Sequential()
-model.add(tf.keras.layers.Flatten())
+model.add(tf.keras.layers.Flatten(input_shape=(28, 28, 1)))
 model.add(tf.keras.layers.Dense(128, activation=tf.nn.relu))
 model.add(tf.keras.layers.Dense(128, activation=tf.nn.relu))
 model.add(tf.keras.layers.Dense(10, activation=tf.nn.softmax))
-model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
 
 # Train Model
 model.fit(train_images, train_labels, epochs=5, batch_size=200, validation_split=0.1)
