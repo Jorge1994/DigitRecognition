@@ -13,7 +13,7 @@ from tensorflow_core.python.keras.layers.image_preprocessing import ResizeMethod
 
 WINDOW_NAME = "Digit Recognition"
 drawing = False 
-background = np.ones((512,512), dtype = "uint8") * 255 #Create a white background
+background = np.ones((1024,1024), dtype = "uint8") * 255 #Create a white background
 
 model = tf.keras.models.load_model('digit_model.h5')
 
@@ -67,9 +67,9 @@ while(True):
     if key == 27: #Escape KEY
         break
     if key == ord('c'):
-        background = np.ones((512,512), dtype = "uint8") * 255
+        background = np.ones((1024,1024), dtype = "uint8") * 255
     if key == ord('r'):
-        ret, thresh = cv2.threshold(background, 0, 255, cv2.THRESH_BINARY_INV)
+        ret, thresh = cv2.threshold(background, 128, 255, cv2.THRESH_BINARY_INV)
         _, contours, hierarchy = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         # Hierarchy = [Next, Previous, First_Child, Parent]
         for counter, contour in enumerate(contours):
