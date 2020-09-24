@@ -9,6 +9,7 @@ import cv2
 import numpy as np
 import tensorflow as tf
 import math
+from scipy import ndimage
 from tensorflow_core.python.keras.layers.image_preprocessing import ResizeMethod
 
 WINDOW_NAME = "Digit Recognition"
@@ -61,6 +62,22 @@ def reshape_image(image):
 cv2.namedWindow(WINDOW_NAME)
 cv2.setMouseCallback(WINDOW_NAME, mouse_draw)
 
+def getBestShift(img):
+    cy,cx = ndimage.measurements.center_of_mass(img)
+
+    rows,cols = img.shape
+    shiftx = np.round(cols/2.0-cx).astype(int)
+    shifty = np.round(rows/2.0-cy).astype(int)
+
+    return shiftx,shifty
+
+
+def shift(img,sx,sy):
+    rows,cols = img.shape
+    M = np.float32([[1,0,sx],[0,1,sy]])
+    shifted = cv2.warpAffine(img,M,(cols,rows))
+    return shifted
+
 while(True):
     cv2.imshow(WINDOW_NAME, background)
     key = cv2.waitKey(1)& 0xFF
@@ -79,7 +96,16 @@ while(True):
             roi = background[y:y+h, x:x+w]
             roi = cv2.bitwise_not(roi)
             roi = reshape_image(roi)
+            (thresh, gray) = cv2.threshold(roi, 128, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
+            
+            gray = roi
+            shiftx,shifty = getBestShift(gray)
+            shifted = shift(gray,shiftx,shifty)
+            gray = shifted
+            roi = gray
+            
             test_image = roi.reshape(-1,28,28,1)
+            test_image.flatten() / 255
             predictions = model.predict(test_image)
             label = np.argmax(predictions[0])
             cv2.putText(background,str(label),(x+w,y+h), cv2.FONT_HERSHEY_SIMPLEX,1.5,(0,0,0),1,cv2.LINE_AA)
